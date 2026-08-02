@@ -1,9 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { X, Upload, FileText, Download } from "react-feather";
+import { X, Upload, FileText, Download, Save } from "react-feather";
+import toast from "react-hot-toast";
 
 import InputControl from "../InputControl/InputControl";
 
 import styles from "./Editor.module.css";
+
+//localStorage key under which saved resume snapshots are stored
+const SAVED_RESUMES_KEY = "resumeBuilder_savedResumes";
 
 function Editor(props) {
   const sections = props.sections; // reciving data from parent component Editor and accesing the props from sections and storing in section varible
@@ -105,6 +109,73 @@ function Editor(props) {
   const handleRemoveOldResume = () => {
     setValues((prev) => ({ ...prev, oldResumeFile: null }));
     setFileError("");
+  };
+
+  //state holding the list of saved resume snapshots (loaded from localStorage)
+  const [savedResumes, setSavedResumes] = useState([]);
+
+  //load any previously saved resume snapshots once, on mount
+  useEffect(() => {
+    try {
+      const existing = JSON.parse(
+        localStorage.getItem(SAVED_RESUMES_KEY) || "[]",
+      );
+      setSavedResumes(existing);
+    } catch (err) {
+      setSavedResumes([]);
+    }
+  }, []);
+
+  //formats an ISO date string for display
+  const formatSavedDate = (isoString) => {
+    try {
+      return new Date(isoString).toLocaleString();
+    } catch (err) {
+      return "";
+    }
+  };
+
+  //saves a full snapshot of the current resume (all sections) as a new entry
+  const handleSaveResumeSnapshot = () => {
+    try {
+      const resumeName =
+        information?.[sections.basicInfo]?.detail?.name || "Untitled Resume";
+
+      const snapshot = {
+        id: Date.now().toString(),
+        name: resumeName,
+        savedAt: new Date().toISOString(),
+        data: information,
+      };
+
+      const existing = JSON.parse(
+        localStorage.getItem(SAVED_RESUMES_KEY) || "[]",
+      );
+      const updated = [snapshot, ...existing];
+
+      localStorage.setItem(SAVED_RESUMES_KEY, JSON.stringify(updated));
+      setSavedResumes(updated);
+      toast.success("Resume saved!");
+    } catch (err) {
+      toast.error("Couldn't save your resume. Please try again.");
+    }
+  };
+
+  //restores a previously saved snapshot back into the editor
+  const handleRestoreSnapshot = (snapshot) => {
+    setInformation(snapshot.data);
+    toast.success(`Loaded "${snapshot.name}"`);
+  };
+
+  //removes a saved snapshot from the list
+  const handleDeleteSnapshot = (id) => {
+    try {
+      const updated = savedResumes.filter((snap) => snap.id !== id);
+      localStorage.setItem(SAVED_RESUMES_KEY, JSON.stringify(updated));
+      setSavedResumes(updated);
+    } catch (err) {
+      toast.error("Couldn't delete that saved version. Please try again.");
+    }
   };
 
   //state handles for updating the point array by indexing and assigning the values
@@ -504,6 +575,99 @@ function Editor(props) {
           </p>
         ) : (
           ""
+        )}
+      </div>
+
+      <div
+        style={{
+          marginTop: "24px",
+          paddingTop: "20px",
+          borderTop: "1px solid #eee",
+        }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "10px",
+          }}>
+          <label style={{ margin: 0 }}>Saved versions of your resume</label>
+          <button
+            type="button"
+            onClick={handleSaveResumeSnapshot}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              cursor: "pointer",
+            }}>
+            <Save size={16} />
+            Save Resume
+          </button>
+        </div>
+
+        {savedResumes.length === 0 ? (
+          <p style={{ color: "#888", fontSize: "13px", marginTop: "10px" }}>
+            No saved versions yet. Click "Save Resume" to keep a snapshot of
+            your current resume that you can come back to later.
+          </p>
+        ) : (
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "8px",
+              marginTop: "12px",
+            }}>
+            {savedResumes.map((snap) => (
+              <div
+                key={snap.id}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: "10px",
+                  padding: "10px 12px",
+                  border: "1px solid #ddd",
+                  borderRadius: "8px",
+                }}>
+                <div style={{ minWidth: 0 }}>
+                  <p
+                    style={{
+                      margin: 0,
+                      fontWeight: 500,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}>
+                    {snap.name}
+                  </p>
+                  <span style={{ fontSize: "12px", color: "#888" }}>
+                    {formatSavedDate(snap.savedAt)}
+                  </span>
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "12px",
+                    flexShrink: 0,
+                  }}>
+                  <button
+                    type="button"
+                    onClick={() => handleRestoreSnapshot(snap)}
+                    style={{ cursor: "pointer" }}>
+                    Load
+                  </button>
+                  <X
+                    style={{ cursor: "pointer" }}
+                    onClick={() => handleDeleteSnapshot(snap.id)}
+                    title="Delete"
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
         )}
       </div>
     </div>
