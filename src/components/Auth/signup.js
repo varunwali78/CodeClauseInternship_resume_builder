@@ -10,6 +10,36 @@ import { Context } from "../../index";
 import styles from "./auth.module.css";
 import SignupSvg from "../../assets/register.svg";
 
+// ---- Validation helpers ----
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PHONE_REGEX = /^[6-9]\d{9}$/; // valid 10 digit phone number
+const SPECIAL_CHAR_REGEX = /[!@#$%^&*(),.?":{}|<>_\-+=~`[\]/\\;']/;
+
+const validateEmail = (email) => {
+  if (!email.trim()) return "Email is required";
+  if (!EMAIL_REGEX.test(email)) return "Enter a valid email address";
+  return "";
+};
+
+const validatePhone = (phone) => {
+  if (!phone.trim()) return "Phone number is required";
+  if (!/^\d{10}$/.test(phone)) return "Phone number must be exactly 10 digits";
+  if (!PHONE_REGEX.test(phone)) return "Enter a valid 10 digit phone number";
+  return "";
+};
+
+const validatePassword = (password) => {
+  if (!password) return "Password is required";
+  if (password.length > 12) return "Password must be at most 12 characters";
+  if (!/[A-Z]/.test(password))
+    return "Password must contain at least one uppercase letter";
+  if (!/[0-9]/.test(password))
+    return "Password must contain at least one number";
+  if (!SPECIAL_CHAR_REGEX.test(password))
+    return "Password must contain at least one special character";
+  return "";
+};
+
 const Signup = () => {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
@@ -17,10 +47,52 @@ const Signup = () => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  const [errors, setErrors] = useState({
+    email: "",
+    phone: "",
+    password: "",
+  });
+
   const { isAuthorized, setIsAuthorized } = useContext(Context);
+
+  const handleEmailChange = (e) => {
+    const value = e.target.value;
+    setEmail(value);
+    setErrors((prev) => ({ ...prev, email: validateEmail(value) }));
+  };
+
+  const handlePhoneChange = (e) => {
+    // only allow digits, cap length at 10
+    const value = e.target.value.replace(/\D/g, "").slice(0, 10);
+    setPhone(value);
+    setErrors((prev) => ({ ...prev, phone: validatePhone(value) }));
+  };
+
+  const handlePasswordChange = (e) => {
+    // cap length at 12 so the user can't even type past the limit
+    const value = e.target.value.slice(0, 12);
+    setPassword(value);
+    setErrors((prev) => ({ ...prev, password: validatePassword(value) }));
+  };
 
   const handleRegister = async (e) => {
     e.preventDefault();
+
+    const emailError = validateEmail(email);
+    const phoneError = validatePhone(phone);
+    const passwordError = validatePassword(password);
+
+    setErrors({
+      email: emailError,
+      phone: phoneError,
+      password: passwordError,
+    });
+
+    if (emailError || phoneError || passwordError) {
+      toast.error("Please fix the highlighted fields before continuing");
+      return;
+    }
+
     try {
       setIsLoading(true); // Start showing loader
       const { data } = await axios.post(
@@ -35,13 +107,14 @@ const Signup = () => {
           withCredentials: true,
           mode: "cors",
           credentials: "include",
-        }
+        },
       );
       toast.success(data.message);
       setName("");
       setEmail("");
       setPassword("");
       setPhone("");
+      setErrors({ email: "", phone: "", password: "" });
       setIsAuthorized(true);
     } catch (error) {
       toast.error(error.response.data.message);
@@ -70,7 +143,6 @@ const Signup = () => {
               <div>
                 <input
                   type="text"
-                  placeholder="Varun"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                 />
@@ -82,36 +154,76 @@ const Signup = () => {
               <div>
                 <input
                   type="email"
-                  placeholder="varun@gmail.com"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={handleEmailChange}
                 />
                 <MdOutlineMailOutline />
               </div>
+              {errors.email && (
+                <p
+                  style={{
+                    color: "#e53935",
+                    fontSize: "0.85rem",
+                    margin: "4px 0 0",
+                  }}>
+                  {errors.email}
+                </p>
+              )}
             </div>
             <div className={styles.inputTag}>
               <label>Phone Number</label>
               <div>
                 <input
-                  type="number"
-                  placeholder="12345678"
+                  type="tel"
+                  inputMode="numeric"
+                  maxLength={10}
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  onChange={handlePhoneChange}
                 />
                 <FaPhoneFlip />
               </div>
+              {errors.phone && (
+                <p
+                  style={{
+                    color: "#e53935",
+                    fontSize: "0.85rem",
+                    margin: "4px 0 0",
+                  }}>
+                  {errors.phone}
+                </p>
+              )}
             </div>
             <div className={styles.inputTag}>
               <label>Password</label>
               <div>
                 <input
                   type="password"
-                  placeholder="Your Password"
+                  maxLength={12}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={handlePasswordChange}
                 />
                 <RiLock2Fill />
               </div>
+              {errors.password ? (
+                <p
+                  style={{
+                    color: "#e53935",
+                    fontSize: "0.85rem",
+                    margin: "4px 0 0",
+                  }}>
+                  {errors.password}
+                </p>
+              ) : (
+                <p
+                  style={{
+                    color: "#888",
+                    fontSize: "0.8rem",
+                    margin: "4px 0 0",
+                  }}>
+                  Max 12 characters, at least 1 uppercase letter, 1 number & 1
+                  special character
+                </p>
+              )}
             </div>
             <button type="submit" onClick={handleRegister}>
               Signup

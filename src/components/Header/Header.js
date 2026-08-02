@@ -20,7 +20,7 @@ function Header() {
           withCredentials: true,
           mode: "cors",
           credentials: "include", //like token,cookies etc
-        }
+        },
       );
       toast.success(response.data.message); //its is used to provied notifications
       setIsAuthorized(false);
@@ -46,16 +46,20 @@ function Header() {
             <GiHamburgerMenu className={styles.icon} onClick={handleisOpen} />
           </div>
           <ul className={`${styles.list} ${isopen ? styles.is_open : ""}`}>
-            <li>
-              <Link className={styles.navlink} to={"/login"}>
-                Login
-              </Link>
-            </li>
-            <li>
-              <Link className={styles.navlink} onClick={handleLogout}>
-                Logout
-              </Link>
-            </li>
+            {!isAuthorized && (
+              <li>
+                <Link className={styles.navlink} to={"/login"}>
+                  Login
+                </Link>
+              </li>
+            )}
+            {isAuthorized && (
+              <li>
+                <Link className={styles.navlink} onClick={handleLogout}>
+                  Logout
+                </Link>
+              </li>
+            )}
           </ul>
         </nav>
       </div>
