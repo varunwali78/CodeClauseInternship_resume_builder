@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import resumeSvg from "../../assets/resume_svg.svg";
 import styles from "./Header.module.css";
-import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
 import { GiHamburgerMenu } from "react-icons/gi";
 
