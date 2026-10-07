@@ -1,93 +1,261 @@
 .container {
   padding: 30px;
+  padding-top: 0;
+
   display: flex;
   flex-direction: column;
   align-items: center;
+
   gap: 30px;
-  padding-top: 0;
 }
+
+/* =========================
+   HEADING
+========================= */
 
 .heading {
   font-weight: 500;
   font-size: 2.1rem;
   letter-spacing: 0.2rem;
+  margin: 0;
 }
+
+/* =========================
+   TOOLBAR
+========================= */
 
 .toolbar {
   width: 100%;
+
   display: flex;
-  gap: 40px;
+  align-items: center;
   justify-content: space-between;
+
+  gap: 40px;
+
+  position: relative;
+}
+
+/* =========================
+   COLOR SECTION
+========================= */
+
+.colorSection {
+  position: relative;
+
+  display: flex;
   align-items: center;
 }
 
-.colors {
-  display: flex;
-  gap: 20px;
-  padding: 0 30px;
-}
+/* =========================
+   COLOR BUTTON
+========================= */
 
-.colors .color {
-  height: 36px;
+.colorButton {
   width: 36px;
+  height: 36px;
+
+  padding: 0;
+
   border-radius: 50%;
-  background-color: #6c63ff;
-}
-.colors .active {
-  border: 2px solid #000; /*sets the background of selected color*/
+
+  border: 2px solid #333;
+
+  color: #fff;
+
+  font-size: 21px;
+  font-weight: bold;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+
+  transition: transform 0.2s ease;
 }
 
-.toolbar button {
-  padding: 8px 16px;
+.colorButton:hover {
+  transform: scale(1.1);
+}
+
+/* =========================
+   COLOR PICKER POPUP
+========================= */
+
+.colorPickerPopup {
+  position: absolute;
+
+  top: 45px;
+  left: 0;
+
+  z-index: 9999;
+
+  padding: 10px;
+
+  background-color: #fff;
+
+  border-radius: 8px;
+
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+}
+
+/* =========================
+   HEX VALUE
+========================= */
+
+.hexValue {
+  margin-top: 10px;
+
+  padding: 8px;
+
+  text-align: center;
+
+  background-color: #f5f5f5;
+
   border-radius: 5px;
-  background-color: #6c63ff;
-  color: #fff;
-  outline: none;
+
+  color: #333;
+
+  font-size: 14px;
+
+  font-family: monospace;
+}
+
+/* =========================
+   DONE BUTTON
+========================= */
+
+.doneButton {
+  width: 100%;
+
+  margin-top: 10px;
+
+  padding: 8px 16px;
+
   border: none;
+
+  border-radius: 5px;
+
+  background-color: #6c63ff;
+
+  color: #fff;
+
   font-weight: 500;
-  font-size: 1rem;
-  letter-spacing: 1px;
-  display: flex;
-  gap: 5px;
-  align-items: center;
+
+  font-size: 14px;
+
   cursor: pointer;
 }
 
-.toolbar button svg {
+.doneButton:hover {
+  background-color: #5d52ff;
+}
+
+/* =========================
+   TOOLBAR BUTTON
+========================= */
+
+.toolbar button.downloadButton {
+  padding: 8px 16px;
+
+  border-radius: 5px;
+
+  background-color: #6c63ff;
+
+  color: #fff;
+
+  outline: none;
+
+  border: none;
+
+  font-weight: 500;
+
+  font-size: 1rem;
+
+  letter-spacing: 1px;
+
+  display: flex;
+
+  gap: 5px;
+
+  align-items: center;
+
+  justify-content: center;
+
+  cursor: pointer;
+
+  transition: background-color 0.2s ease;
+}
+
+.toolbar button.downloadButton:hover {
+  background-color: #5d52ff;
+}
+
+.toolbar button.downloadButton svg {
   height: 20px;
   width: 20px;
 }
 
+/* =========================
+   MAIN
+========================= */
+
 .main {
   display: flex;
+
   flex-direction: column;
+
   gap: 30px;
+
   width: 100%;
 }
 
-/* Media Queries */
+/* =========================
+   MOBILE
+========================= */
 
 @media only screen and (min-width: 280px) and (max-width: 480px) {
   .container {
     padding: 25px;
+    padding-top: 0;
   }
+
   .toolbar {
     flex-direction: row;
+
     flex-wrap: wrap;
+
+    gap: 20px;
   }
-  .toolbar button {
-    margin-left: 28px;
+
+  .colorPickerPopup {
+    left: 0;
+  }
+
+  .toolbar button.downloadButton {
+    margin-left: 0;
   }
 }
+
+/* =========================
+   TABLET
+========================= */
 
 @media only screen and (min-width: 481px) and (max-width: 768px) {
   .container {
     padding: 30px;
+    padding-top: 0;
   }
 }
+
+/* =========================
+   LAPTOP / TABLET
+========================= */
 
 @media only screen and (min-width: 769px) and (max-width: 1024px) {
   .container {
     padding: 35px;
+    padding-top: 0;
   }
 }

@@ -1,16 +1,26 @@
 import React, { useRef, useState } from "react";
 import ReactToPrint from "react-to-print";
 import { ArrowDown } from "react-feather";
-// import toast from "react-hot-toast";
+import { ChromePicker } from "react-color";
+
 import Editor from "../Editor/Editor";
 import Resume from "../Resume/Resume";
 
 import styles from "./Body.module.css";
 
-function Body({ props }) {
-  const colors = ["#6c63ff", "#48bb78", "#0bc5ea", "#a0aec0", "#ed8936"]; //array of colors
+function Body() {
+  // Reference to Resume component for printing
+  const resumeRef = useRef();
+
+  // Selected color
+  // User can change this to ANY color using the color picker
+  const [activeColor, setActiveColor] = useState("#6c63ff");
+
+  // Show/hide color picker
+  const [showColorPicker, setShowColorPicker] = useState(false);
+
+  // Resume sections
   const sections = {
-    //objects for each section in the resume
     basicInfo: "Basic Info",
     workExp: "Work Experience",
     skill: "skills",
@@ -20,26 +30,27 @@ function Body({ props }) {
     summary: "Summary",
     other: "Other",
   };
-  const resumeRef = useRef(); //reference to access the child component (Resume)
 
-  const [activeColor, setActiveColor] = useState(colors[0]);
+  // Resume information
   const [resumeInformation, setResumeInformation] = useState({
     [sections.basicInfo]: {
-      // Array of object containing information about Basic info
       id: sections.basicInfo,
       sectionTitle: sections.basicInfo,
       detail: {},
     },
+
     [sections.workExp]: {
       id: sections.workExp,
       sectionTitle: sections.workExp,
       details: [],
     },
+
     [sections.skill]: {
       id: sections.skill,
       sectionTitle: sections.skill,
       details: [],
     },
+
     [sections.project]: {
       id: sections.project,
       sectionTitle: sections.project,
@@ -51,16 +62,19 @@ function Body({ props }) {
       sectionTitle: sections.education,
       details: [],
     },
+
     [sections.achievement]: {
       id: sections.achievement,
       sectionTitle: sections.achievement,
       points: [],
     },
+
     [sections.summary]: {
       id: sections.summary,
       sectionTitle: sections.summary,
       detail: "",
     },
+
     [sections.other]: {
       id: sections.other,
       sectionTitle: sections.other,
@@ -68,39 +82,74 @@ function Body({ props }) {
     },
   });
 
+  // Handle color change
+  const handleColorChange = (color) => {
+    setActiveColor(color.hex);
+  };
+
   return (
     <div className={styles.container}>
+      {/* Page Heading */}
       <p className={styles.heading}>Resume Builder</p>
+
+      {/* Toolbar */}
       <div className={styles.toolbar}>
-        <div className={styles.colors}>
-          {colors.map((item) => (
-            <span
-              key={item}
-              style={{ backgroundColor: item }}
-              className={`${styles.color} ${
-                activeColor === item ? styles.active : ""
-              }`}
-              onClick={() => setActiveColor(item)}
-            />
-          ))}
-        </div>
-        <ReactToPrint
-          trigger={() => {
-            return (
-              <button>
-                Download <ArrowDown />
+        {/* COLOR PICKER */}
+        <div className={styles.colorSection}>
+          <button
+            type="button"
+            className={styles.colorButton}
+            style={{
+              backgroundColor: activeColor,
+            }}
+            onClick={() => setShowColorPicker(!showColorPicker)}
+            title="Choose resume color">
+            +
+          </button>
+
+          {/* Color Picker Popup */}
+          {showColorPicker && (
+            <div className={styles.colorPickerPopup}>
+              <ChromePicker color={activeColor} onChange={handleColorChange} />
+
+              {/* Selected HEX value */}
+              <div className={styles.hexValue}>
+                Hex: {activeColor.toUpperCase()}
+              </div>
+
+              {/* Done button */}
+              <button
+                type="button"
+                className={styles.doneButton}
+                onClick={() => setShowColorPicker(false)}>
+                Done
               </button>
-            );
-          }}
+            </div>
+          )}
+        </div>
+
+        {/* DOWNLOAD BUTTON */}
+        <ReactToPrint
+          trigger={() => (
+            <button className={styles.downloadButton}>
+              Download
+              <ArrowDown size={18} />
+            </button>
+          )}
           content={() => resumeRef.current}
         />
       </div>
+
+      {/* Main Section */}
       <div className={styles.main}>
+        {/* Editor */}
         <Editor
-          sections={sections} //giving the props to Editor component
+          sections={sections}
           information={resumeInformation}
           setInformation={setResumeInformation}
         />
+
+        {/* Resume Preview */}
         <Resume
           ref={resumeRef}
           sections={sections}
