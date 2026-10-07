@@ -19,18 +19,6 @@ function Header() {
           <div className={styles.logo}>
             <h3>Resume Builder</h3>
           </div>
-
-          <div className={styles.navmenu}>
-            <GiHamburgerMenu className={styles.icon} onClick={handleisOpen} />
-          </div>
-
-          <ul className={`${styles.list} ${isopen ? styles.is_open : ""}`}>
-            <li>
-              <Link className={styles.navlink} to="/templates">
-                Templates
-              </Link>
-            </li>
-          </ul>
         </nav>
       </div>
 
